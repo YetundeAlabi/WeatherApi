@@ -1,6 +1,5 @@
 import random
-
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
@@ -10,8 +9,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     SignUpSerializer, LoginSerializer, ResetPasswordSerializer, ForgetPasswordSerializer, VerifyPinSerializer
                     )
-from utils import Util
+from .utils import Util
 
+User = get_user_model()
 
 def generate_otp():
     otp = str(random.randint(1000, 9999)) #generate 4 digits random number as otp
