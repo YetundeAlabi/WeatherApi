@@ -81,7 +81,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "locationapi.wsgi.application"
 
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = ["https://weatherapi-xlqh.onrender.com"]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
