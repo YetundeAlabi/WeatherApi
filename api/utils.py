@@ -1,20 +1,19 @@
 import smtplib
-
-from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from django.conf import settings
 
+
 class Util:
-    
+
     @staticmethod
     def send_email(data):
         try:
-            email = EmailMessage(
+            send_mail(
                 subject=data['email_subject'],
-                body=data['email_body'],
+                message=data['email_body'],
                 from_email=settings.EMAIL_HOST_USER,
-                to=[data['to_email']]
+                recipient_list=[data['to_email']], fail_silently=False
             )
-            email.send(fail_silently=False)
         except smtplib.SMTPException as e:
             print(f"An error occured: {e}")
         

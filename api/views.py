@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
-    SignUpSerializer, LoginSerializer, ResetPasswordSerializer, ForgetPasswordSerializer, VerifyPinSerializer
+    SignUpSerializer, LoginSerializer, ResetPasswordSerializer, ForgetPasswordSerializer, 
+    VerifyPinSerializer, UserSerializer
                     )
 from .utils import Util
 
@@ -26,7 +27,8 @@ class SignUpAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"status": True, "message": "Account created successfullly.", "data":serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({"status": True, "message": "Account created successfullly.", "data":serializer.data}, 
+                            status=status.HTTP_201_CREATED)
         return Response({"status": False, "errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -38,9 +40,11 @@ class LoginAPIView(GenericAPIView):
         if serializer.is_valid():
             user = serializer.validated_data
             token = RefreshToken.for_user(user)
+            serializer = UserSerializer(user)
             refresh_token = str(token)
             access_token = str(token.access_token)
-            return Response({"status": True, "refresh": refresh_token, "access": access_token}, status=status.HTTP_200_OK)
+            return Response({"status": True, "data": serializer.data, "refresh": refresh_token, "access": access_token},
+                            status=status.HTTP_200_OK)
         return Response({"status": False, "errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -54,13 +58,15 @@ class ForgetPasswordView(GenericAPIView):
             try:
                 user = User.objects.filter(email=email).get()
             except User.DoesNotExist:
-                return Response({"status": False,"error": "Invalid email address. Enter a correct email address"}, status=status.HTTP_400_BAD_REQUEST)
-
-            user.verification_code = generate_otp()
+                return Response({"status": False, "error": "Invalid email address. Enter a correct email address"},
+                                status=status.HTTP_400_BAD_REQUEST)
+            otp = generate_otp()
+            user.verification_code = otp
+            print(user.verification_code)
             user.save(update_fields=["verification_code"])
             #send email
             subject = "Password Reset Verification Pin"
-            body = f'Your verification pin is {generate_otp()}'
+            body = f'Your verification pin is {otp}'
             data = {"email_body": body, "to_email": email,
                     "email_subject": subject}
             Util.send_email(data)
